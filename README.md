@@ -5,4 +5,4 @@ Install the below Dependencies :
 3. pip install Flask
 
 How to Run the API :
-$ python app.py
+                    $ python app.py
