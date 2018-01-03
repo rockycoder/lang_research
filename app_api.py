@@ -1,9 +1,10 @@
 import flask
 import spacy
 from flask import Flask
-nlp = spacy.load("en_core_web_lg")
+# nlp = spacy.load("en_core_web_lg")
 # Setup flask app
 flask_app = Flask(__name__)
+from app import nlp
 
 
 @flask_app.route('/')
