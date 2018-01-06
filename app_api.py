@@ -1,49 +1,82 @@
 import flask
 import spacy
 from flask import Flask
+from Queue import Queue
+from threading import Thread
+
 # nlp = spacy.load("en_core_web_lg")
 # Setup flask app
 flask_app = Flask(__name__)
 from app import nlp
+l = {}
+li = []
+sen = []
 
 
 @flask_app.route('/')
 def index():
     return 'Index Page'
 
+
 # Status URL for ops purpose
 
 
 @flask_app.route('/keywords/', methods=['POST'])
 def keywords():
-    payload  = flask.request.get_json(force=True)
-    keywords    = payload["keywords"]
-    title    = payload["title"]
+    payload = flask.request.get_json(force=True)
+    keywords = payload["keywords"]
+    title = payload["title"]
     Asin = payload["Asin"]
-    result = {}  # dictionary to keep output
-    key = []  # list to store keywords and relevance_score
-    result["ASIN"] = Asin
-    response, dic = get_keyword(keywords, title)
-    # result['keywords'] = get_keyword(words, title)
-    for r in response:
-        key.append({'keyword': r, 'relevance_score': dic[r]})
+    sort = payload["sort"]
 
-    result["result"] = key
-    return flask.jsonify(result)
+    if sort == True:
+        keywords_queue = Queue()
+        max_threads = 10
+        print "Populating queue"
+        for keyword in keywords:
+            keyword = keyword.strip()
+            keywords_queue.put(keyword)
 
 
-def get_keyword(words, title):
-    l = {}
-    li = []
-    # print (type(words))
-    doc = nlp(title)
-    for t in words:
-        doc1 = nlp(t)
-        l[t.strip()] = doc1.similarity(doc)
-        # print (l[t])
-    print (l)
 
-    # Function to sort the dictionary 'l' according to relevance_score
+        print "Starting %d workers" % max_threads
+        for i in range(max_threads):
+            worker = Thread(target=task, args=(keywords_queue, title,))
+            worker.setDaemon(True)
+            worker.start()
+        keywords_queue.join()
+
+        result = {}  # dictionary to keep output
+        key = []  # list to store keywords and relevance_score
+        result["ASIN"] = Asin
+        response, dic = get_keyword()
+        # response, dic = li, l
+        # result['keywords'] = get_keyword(words, title)
+        for r in response:
+            key.append({'keyword': r, 'relevance_score': dic[r]})
+
+        result["result"] = key
+        return flask.jsonify(result)
+    else:
+        result = {"keywords": keywords}
+        return flask.jsonify(result)
+
+
+def get_keyword():
+
+    # sen = []
+    # doc = nlp(title)
+    # while True:
+    #
+    #     word = queue.get()
+    #     if word not in l.keys():
+    #         doc1 = nlp(word)
+    #         l[word] = doc1.similarity(doc)
+    #         sen.append(word)
+    #     else:
+    #         print ("exists")
+    #     queue.task_done()
+
     def comp(val):
         v = val.strip()
         if v in l.keys():
@@ -52,8 +85,79 @@ def get_keyword(words, title):
         else:
             return 0
 
-    for word in sorted(words, key=comp):
-        if word.strip() in l.keys():
-            li.append(word)
-    print (li)
+    for w in sorted(sen, key=comp):
+        if w.strip() in l.keys():
+            li.append(w)
     return li, l
+    # return
+
+
+def task(queue, title):
+    doc = nlp(title)
+    while not queue.empty():
+
+        word = queue.get()
+        queue.task_done()
+
+        if word not in l.keys():
+            doc1 = nlp(word)
+            l[word] = doc1.similarity(doc)
+            sen.append(word)
+        else:
+            print ("exists")
+
+        # queue.task_done()
+
+
+
+
+
+
+
+
+#
+#     l = {}
+#     li = []
+#     # print (type(words))
+#     doc = nlp(title)
+#     for t in words:
+#         doc1 = nlp(t)
+#         l[t.strip()] = doc1.similarity(doc)
+#         # print (l[t])
+#     print (l)
+#
+#     # Function to sort the dictionary 'l' according to relevance_score
+#     def comp(val):
+#         v = val.strip()
+#         if v in l.keys():
+#             # print (-float(l[v]))
+#             return -float(l[v])
+#         else:
+#             return 0
+#
+#     for word in sorted(words, key=comp):
+#         if word.strip() in l.keys():
+#             li.append(word)
+#     print (li)
+#     return li, l
+#
+#
+# def task(queue):
+#     while True:
+#         example = queue.get()
+#         if not is_translation_present(translations, example):
+#             translation = get_translation(example)
+#             if translation is not None:
+#                 translations.insert_one({
+#                     "input": example,
+#                     "output": {
+#                         "hi": translation
+#                     }
+#                 })
+#                 log_msg("Inserted", example)
+#             else:
+#                 log_msg("Failed", example)
+#         else:
+#             log_msg("Exists", example)
+#         queue.task_done()
+#
