@@ -3,8 +3,6 @@ import spacy
 from flask import Flask
 from Queue import Queue
 from threading import Thread
-
-# nlp = spacy.load("en_core_web_lg")
 # Setup flask app
 flask_app = Flask(__name__)
 from app import nlp
@@ -64,19 +62,6 @@ def keywords():
 
 def get_keyword():
 
-    # sen = []
-    # doc = nlp(title)
-    # while True:
-    #
-    #     word = queue.get()
-    #     if word not in l.keys():
-    #         doc1 = nlp(word)
-    #         l[word] = doc1.similarity(doc)
-    #         sen.append(word)
-    #     else:
-    #         print ("exists")
-    #     queue.task_done()
-
     def comp(val):
         v = val.strip()
         if v in l.keys():
@@ -106,58 +91,3 @@ def task(queue, title):
         else:
             print ("exists")
 
-        # queue.task_done()
-
-
-
-
-
-
-
-
-#
-#     l = {}
-#     li = []
-#     # print (type(words))
-#     doc = nlp(title)
-#     for t in words:
-#         doc1 = nlp(t)
-#         l[t.strip()] = doc1.similarity(doc)
-#         # print (l[t])
-#     print (l)
-#
-#     # Function to sort the dictionary 'l' according to relevance_score
-#     def comp(val):
-#         v = val.strip()
-#         if v in l.keys():
-#             # print (-float(l[v]))
-#             return -float(l[v])
-#         else:
-#             return 0
-#
-#     for word in sorted(words, key=comp):
-#         if word.strip() in l.keys():
-#             li.append(word)
-#     print (li)
-#     return li, l
-#
-#
-# def task(queue):
-#     while True:
-#         example = queue.get()
-#         if not is_translation_present(translations, example):
-#             translation = get_translation(example)
-#             if translation is not None:
-#                 translations.insert_one({
-#                     "input": example,
-#                     "output": {
-#                         "hi": translation
-#                     }
-#                 })
-#                 log_msg("Inserted", example)
-#             else:
-#                 log_msg("Failed", example)
-#         else:
-#             log_msg("Exists", example)
-#         queue.task_done()
-#
