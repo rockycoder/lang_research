@@ -77,4 +77,3 @@ def task(queue, title):
         else:
             print ("exists")
         queue.task_done()
-
