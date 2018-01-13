@@ -1,7 +1,8 @@
+import flask
 import goless
 import operator
-from app import flask
-flask_app = flask(__name__)
+from flask import Flask
+flask_app = Flask(__name__)
 
 
 @flask_app.route('/')
