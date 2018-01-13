@@ -1,10 +1,10 @@
-import concurrent.futures
 import flask
 import goless
+import operator
 from flask import Flask
 flask_app = Flask(__name__)
-from app import nlp
-import operator
+
+
 @flask_app.route('/')
 def index():
     return 'Index Page'
@@ -49,6 +49,7 @@ def index():
 
 @flask_app.route('/keywordsV2/', methods=['POST'])
 def keywords():
+    from app import nlp
     l = {}
     payload = flask.request.get_json(force=True)
     keywords = payload["keywords"]
@@ -65,10 +66,27 @@ def keywords():
     for k1 in keywords:
         l[k1] = chn.recv()
 
-    return flask.jsonify(l)
+    if sort:
+         result = {}  # dictionary to keep output
+         key = []  # list to store keywords and relevance_score
+         result["ASIN"] = Asin
+         sorted_l = sorted(l.items(), key=operator.itemgetter(1), reverse=True)
 
+         for r in sorted_l:
+             key.append({'keyword': r[0], 'relevance_score': r[1]})
+             result["result"] = key
+         return flask.jsonify(result)
+    else :
+        result = {}  # dictionary to keep output
+        key = []  # list to store keywords and relevance_score
+        result["ASIN"] = Asin
+        for r in l:
+            key.append({'keyword': r[0], 'relevance_score': r[1]})
+            result["result"] = key
+        return flask.jsonify(result)
 
 def get_score(keyword,comp_str,chn):
+    from app import nlp
     doc1 = nlp(keyword)
     chn.send(doc1.similarity(comp_str))
 
