@@ -1,8 +1,7 @@
-import flask
 import goless
 import operator
-from flask import Flask
-flask_app = Flask(__name__)
+from app import flask
+flask_app = flask(__name__)
 
 
 @flask_app.route('/')
@@ -84,6 +83,7 @@ def keywords():
             key.append({'keyword': r[0], 'relevance_score': r[1]})
             result["result"] = key
         return flask.jsonify(result)
+
 
 def get_score(keyword,comp_str,chn):
     from app import nlp
