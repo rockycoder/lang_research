@@ -1,6 +1,7 @@
 import flask
 import goless
 import operator
+from app import nlp
 from flask import Flask
 flask_app = Flask(__name__)
 
@@ -49,7 +50,6 @@ def index():
 
 @flask_app.route('/keywordsV2/', methods=['POST'])
 def keywords():
-    from app import nlp
     l = {}
     payload = flask.request.get_json(force=True)
     keywords = payload["keywords"]
@@ -61,7 +61,7 @@ def keywords():
     chn = goless.chan()
 
     for k in keywords:
-        goless.go(get_score, k, title,chn)
+        goless.go(get_score, k, title, chn)
 
     for k1 in keywords:
         l[k1] = chn.recv()
@@ -87,7 +87,6 @@ def keywords():
 
 
 def get_score(keyword,comp_str,chn):
-    from app import nlp
     doc1 = nlp(keyword)
     chn.send(doc1.similarity(comp_str))
 
