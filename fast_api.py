@@ -1,6 +1,7 @@
 import flask
 import goless
 import operator
+import spacy_lib
 from flask import Flask
 flask_app = Flask(__name__)
 
@@ -49,7 +50,7 @@ def index():
 
 @flask_app.route('/keywordsV2/', methods=['POST'])
 def keywords():
-    from app import nlp
+    nlp = spacy_lib.SPSpacy.nlp
     l = {}
     payload = flask.request.get_json(force=True)
     keywords = payload["keywords"]
@@ -57,14 +58,16 @@ def keywords():
     title = nlp(title)
     Asin = payload["Asin"]
     sort = payload["sort"]
-
     chn = goless.chan()
 
     for k in keywords:
-        goless.go(get_score, k, title,chn)
+        print(k)
+        goless.go(get_score, k, title, chn)
 
     for k1 in keywords:
-        l[k1] = chn.recv()
+        v = chn.recv()
+        print(v)
+        l[k1] = v
 
     if sort:
          result = {}  # dictionary to keep output
@@ -80,14 +83,14 @@ def keywords():
         result = {}  # dictionary to keep output
         key = []  # list to store keywords and relevance_score
         result["ASIN"] = Asin
-        for r in l:
-            key.append({'keyword': r[0], 'relevance_score': r[1]})
+        for k,v in l.items():
+            key.append({'keyword': k, 'relevance_score': v})
             result["result"] = key
         return flask.jsonify(result)
 
 
 def get_score(keyword,comp_str,chn):
-    from app import nlp
+    nlp = spacy_lib.SPSpacy.nlp
     doc1 = nlp(keyword)
     chn.send(doc1.similarity(comp_str))
 
