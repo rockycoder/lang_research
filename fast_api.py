@@ -58,16 +58,20 @@ def keywords():
     title = nlp(title)
     Asin = payload["Asin"]
     sort = payload["sort"]
-    chn = goless.chan()
+    chn = goless.chan(len(keywords))
+
+    def get_score(keyword, comp_str):
+        print(keyword)
+        doc1 = nlp(keyword)
+        chn.send(doc1.similarity(comp_str))
 
     for k in keywords:
         print(k)
-        goless.go(get_score, k, title, chn)
+        goless.go(get_score, k, title)
 
     for k1 in keywords:
-        v = chn.recv()
-        print(v)
-        l[k1] = v
+        v1 = chn.recv()
+        l[k1]=v1
 
     if sort:
          result = {}  # dictionary to keep output
@@ -88,11 +92,6 @@ def keywords():
             result["result"] = key
         return flask.jsonify(result)
 
-
-def get_score(keyword,comp_str,chn):
-    nlp = spacy_lib.SPSpacy.nlp
-    doc1 = nlp(keyword)
-    chn.send(doc1.similarity(comp_str))
 
 
 
