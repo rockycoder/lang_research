@@ -5,9 +5,6 @@ flask_app = Flask(__name__)
 from app import nlp
 import operator
 
-l = {}
-response = {}
-comp_str = ""
 @flask_app.route('/')
 def index():
     return 'Index Page'
@@ -24,15 +21,12 @@ def keywords():
     title = nlp(title)
     Asin = payload["Asin"]
     sort = payload["sort"]
-    l.clear()
-    response.clear()
-    global comp_str
-    comp_str = ""
+    response = {}
     if sort:
-        comp_str = title
+
         with concurrent.futures.ProcessPoolExecutor(max_workers= 4) as executor:
 
-            for (word, score) in executor.map(get_score, keywords):
+            for (word, score) in executor.map(get_score, keywords, title):
                 response[word] = score
 
         result = {}  # dictionary to keep output
@@ -51,11 +45,6 @@ def keywords():
 
 
 
-def get_score(keyword,):
+def get_score(keyword, comp_str):
     doc1 = nlp(keyword)
-    l[keyword] = doc1.similarity(comp_str)
-    return keyword, l[keyword]
-
-
-
-
+    return keyword, doc1.similarity(comp_str)
