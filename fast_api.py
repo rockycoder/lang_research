@@ -61,35 +61,34 @@ def keywords():
     chn = goless.chan(len(keywords))
 
     def get_score(keyword, comp_str):
-        print(keyword)
         doc1 = nlp(keyword)
         chn.send(doc1.similarity(comp_str))
 
     for k in keywords:
-        print(k)
         goless.go(get_score, k, title)
 
     for k1 in keywords:
-        v1 = chn.recv()
-        l[k1]=v1
+        l[k1] = chn.recv()
 
     if sort:
-         result = {}  # dictionary to keep output
-         key = []  # list to store keywords and relevance_score
-         result["ASIN"] = Asin
-         sorted_l = sorted(l.items(), key=operator.itemgetter(1), reverse=True)
-
-         for r in sorted_l:
-             key.append({'keyword': r[0], 'relevance_score': r[1]})
-             result["result"] = key
-         return flask.jsonify(result)
-    else :
         result = {}  # dictionary to keep output
         key = []  # list to store keywords and relevance_score
         result["ASIN"] = Asin
-        for k,v in l.items():
+        sorted_l = sorted(l.items(), key=operator.itemgetter(1), reverse=True)
+
+        for r in sorted_l:
+            key.append({'keyword': r[0], 'relevance_score': r[1]})
+
+        result["result"] = key
+        return flask.jsonify(result)
+    else:
+        result = {}  # dictionary to keep output
+        key = []  # list to store keywords and relevance_score
+        result["ASIN"] = Asin
+        for k, v in l.items():
             key.append({'keyword': k, 'relevance_score': v})
-            result["result"] = key
+
+        result["result"] = key
         return flask.jsonify(result)
 
 
